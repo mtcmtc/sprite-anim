@@ -1,115 +1,97 @@
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
   <link rel="stylesheet" type="text/css" href="./css/base.css">
-  <style>
-    body {
-      padding: 20px;
-      text-align: center;
-    }
+  <body>
 
-    .parent {
-      position: relative;
-      width: 20%;
-      margin: 0 auto 0 auto; /* positioning tweak */
-    }
+<style type="text/css">
+  @keyframes sprite {from { background-position: 0 0%; }to { background-position: 0 100%; }}
+  .sprite-position{width:25%;}
+  .sprite-container:before {
+    content: "";
+    display: block;
+    padding-top: 61.38%; 
+  }
+  .sprite {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+  .sprite.anim-loaded {background:url('./assets/ryu-sprite-demo.png') no-repeat 0 0; background-size: 100%;}
 
-    .parent:before {
-      content: "";
-      display: block;
-      padding-top: 153.27%; 
-    }
+  .sprite.anim-loaded{animation: sprite 5s steps(45) infinite; animation-play-state: paused;}
 
-    .sprite-container {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-    }
+  .sprite.play{animation-play-state: running;} 
+</style>
 
-    .sprite-container.anim-loaded {background:url('./assets/linen.jpg') no-repeat 0 0; background-size: 100%;}
-
-    .sprite-container.anim-loaded{animation: sprite 1.3s steps(13) infinite;}
-
-    .sprite-container.pause{animation-play-state: paused;}
-
-    @keyframes sprite {
-      from { background-position: 0 0%; }
-      to { background-position: 0 100%; }
-    }
-  </style>
-</head>
-<body>
-  <div style="max-width:1280px; margin:0 auto;">
-    <div class="parent">
-      <div class="sprite-container"></div>
-    </div>
+<div class="sprite-position sds_absolute mkt_absolute--top-left">
+  <div class="sprite-container">
+    <div class="sprite"></div>
   </div>
-  <script type="text/javascript">
-    function loadSprite(src, callback) {
-      var sprite = new Image();
-      sprite.onload = callback;
-      sprite.src = src;
-    }
+</div>
 
-    loadSprite('./assets/linen.jpg', function() {
-        var sprite = document.getElementsByClassName('sprite-container')[0];
-        sprite.classList.add('anim-loaded');
+<script type="text/javascript">
+var wcdAnimControl = function(el, filepath){
+  this.hidden = 0;
+  this.current = 0;
+  this.parent = document.getElementsByClassName(el)[0].parentNode
+  this.animation = document.getElementsByClassName(el)[0]
+  this.intervalId = 0;
+  this.paused = true;
+  this.button;
+  
+  var that = this;
+
+  this.init = function(){
+    that.generatePauseButton();
+    that.button.addEventListener('click', function(){ !that.paused ? that.pause() : that.play();});
+    that.event = document.createEvent('HTMLEvents');
+    that.event.initEvent('click', true, false);
+
+    that.loadSprite(filepath, function() {
+      var sprite = document.getElementsByClassName(el)[0];
+      sprite.classList.add('anim-loaded');
+      linen_anim_control.button.dispatchEvent(linen_anim_control.event);
     });
-
-    var wcdAnimControl = function(el){
-    this.hidden = 0;
-    this.current = 0;
-    this.parent = document.getElementsByClassName(el)[0].parentNode
-    this.animation = document.getElementsByClassName(el)[0]
-    this.intervalId = 0;
-    this.paused = true;
-    this.button;
-    
-    var that = this;
-
-    this.init = function(){
-      that.generatePauseButton();
-
-      that.button.addEventListener('click', function(){
-            !that.paused ? that.pause() : that.play();
-        });
-
-      var event = document.createEvent('HTMLEvents');
-      event.initEvent('click', true, false);
-      that.button.dispatchEvent(event);
-    }
-
-    this.play = function(){
-      that.paused = false;
-      that.button.className = "playbutton active";
-      that.animation.classList.remove('pause');
-    }
-
-    this.generatePauseButton = function(){
-          var html = "<a class='playbutton'><span class='sds_visually-hidden'>pause play button</span></a>"
-          var css = ".animcontrol{position: absolute;top:93%;left:3%; padding:2% 2%;}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #999;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #999;border-right:4px solid #999;content:'';height:15px;opacity:1;position:absolute;right:0;top:-7px;width:5px;}",
-          style = document.createElement('style');
-          div = document.createElement('div');
-          that.parent.insertBefore(style, that.parent.firstChild);
-          that.parent.appendChild(div);
-          style.type = 'text/css';
-          div.className = 'animcontrol';
-
-          style.innerHTML = css;
-          div.innerHTML = html;
-          that.button = that.parent.querySelectorAll('div.animcontrol .playbutton')[0];
-      }
-
-      this.pause = function(){
-          that.animation.className += ' ' + 'pause';
-          that.paused = true;
-          that.button.className = "playbutton";
-      }
-
-      this.init();
   }
 
-  var linen_anim_control = new wcdAnimControl("sprite-container");
-  </script>
+  this.loadSprite = function(src, callback) {
+    var sprite = new Image();
+    sprite.onload = callback;
+    sprite.src = src;
+  }
+
+  this.play = function(){
+    that.paused = false;
+    that.button.className = "playbutton active";
+    that.animation.className += ' ' + 'play';
+  }
+
+  this.pause = function(){
+    that.animation.classList.remove('play');
+    that.paused = true;
+    that.button.className = "playbutton";
+  }
+
+  this.generatePauseButton = function(){
+    var html = "<a class='playbutton'><span class='sds_visually-hidden'>pause play button</span></a>"
+    var css = ".animcontrol{position: absolute;bottom:0;padding:3%;}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #a0968c;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #a0968c;border-right:4px solid #a0968c;content:'';height:12px;opacity:1;position:absolute;right:0;top:-7px;width:4px;}",
+    style = document.createElement('style');
+    div = document.createElement('div');
+    that.parent.insertBefore(style, that.parent.firstChild);
+    that.parent.appendChild(div);
+    style.type = 'text/css';
+    div.className = 'animcontrol';
+
+    style.innerHTML = css;
+    div.innerHTML = html;
+    that.button = that.parent.querySelectorAll('div.animcontrol .playbutton')[0];
+  }
+
+  this.init();
+}
+
+var linen_anim_control = new wcdAnimControl("sprite", "./assets/ryu-sprite-demo.png");
+</script>
 </body>
