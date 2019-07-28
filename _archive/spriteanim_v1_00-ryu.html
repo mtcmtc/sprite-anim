@@ -1,7 +1,22 @@
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="./css/base.css">
+  <link rel="stylesheet" type="text/css" href="./banana-republic-8795547353.css">
   <style>
+    /*.sprite-container {
+      width: 12.5%;
+      height: 520px;
+      display: block;
+      background-image: url("./owl/test-anim.jpg");
+    }
+
+    .sprite-container.play{animation: sprite .75s steps(8) infinite;}
+
+    @keyframes sprite {
+     100% {
+       background-position: 100%;
+     }
+    }*/
+
     body {
       padding: 20px;
       text-align: center;
@@ -9,14 +24,14 @@
 
     .parent {
       position: relative;
-      width: 20%;
+      width: 30%;
       margin: 0 auto 0 auto; /* positioning tweak */
     }
 
     .parent:before {
       content: "";
       display: block;
-      padding-top: 108.33%; 
+      padding-top: 61.38%; 
     }
 
     .sprite-container {
@@ -25,9 +40,10 @@
       right: 0;
       top: 0;
       bottom: 0;
+      background:  url('./ryu-sprite-demo.png') no-repeat 0 0;
+      background-size: 100%;
+      animation: sprite 3s steps(45) infinite;
     }
-
-    .sprite-container.anim-loaded {background:url('./assets/test-anim_full.jpg') no-repeat 0 0; background-size: 100%; animation: sprite 1s steps(7) infinite;}
 
     @keyframes sprite {
       from { background-position: 0 0%; }
@@ -39,19 +55,4 @@
   <div class="parent">
     <div class="sprite-container play"></div>
   </div>
-
-  <script type="text/javascript">
-
-    function loadSprite(src, callback) {
-      var sprite = new Image();
-      sprite.onload = callback;
-      sprite.src = src;
-    }
-
-    loadSprite('./assets/test-anim_full.jpg', function() {
-        var sprite = document.getElementsByClassName('sprite-container')[0];
-        sprite.classList.add('anim-loaded');
-    });
-
-  </script>
 </body>
