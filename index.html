@@ -1,97 +1,123 @@
 <head>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
   <link rel="stylesheet" type="text/css" href="./css/base.css">
-  <body>
+  <style>
+    body {
+      padding: 20px;
+      text-align: center;
+    }
 
-<style type="text/css">
-  @keyframes sprite {from { background-position: 0 0%; }to { background-position: 0 100%; }}
-  .sprite-position{width:25%;}
-  .sprite-container:before {
-    content: "";
-    display: block;
-    padding-top: 61.38%; 
-  }
-  .sprite {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-  }
-  .sprite.anim-loaded {background:url('./assets/ryu-sprite-demo.png') no-repeat 0 0; background-size: 100%;}
+    @keyframes sprite {0% { background-position: 0 0%; } 100%{ background-position: 0 100%; }}
 
-  .sprite.anim-loaded{animation: sprite 5s steps(45) infinite; animation-play-state: paused;}
+    .sprite-container {position: relative;}
+    [data-sprite] {position: absolute;left: 0;right: 0;top: 0;bottom: 0;}
+    [data-sprite].sprite-loaded{animation-name: sprite;animation-iteration-count: infinite;animation-play-state: paused;}
 
-  .sprite.play{animation-play-state: running;} 
-</style>
+    [data-sprite].anim-play{animation-play-state: running;}
 
-<div class="sprite-position sds_absolute mkt_absolute--top-left">
-  <div class="sprite-container">
-    <div class="sprite"></div>
+    [data-sprite="performance_anim1"].sprite-loaded {background:url('./assets/aloe_film.jpg') no-repeat 0 0; background-size: 100%; animation-duration: 2s; animation-timing-function: steps(13);}
+    [data-sprite="performance_anim2"].sprite-loaded {background:url('./assets/paperbag_film.jpg') no-repeat 0 0; background-size: 100%; animation-duration: 1.5s; animation-timing-function: steps(6);}
+
+        .sprite-container .sprite_anim-control{right:0;}
+  </style>
+</head>
+<body>
+  <div style="max-width:267px; margin:0 auto;margin-bottom:10%;">
+    <div class="sprite-container">
+        <div data-sprite="performance_anim1"></div>
+    </div>
   </div>
-</div>
+  <div style="max-width:267px; margin:0 auto;">
+    <div class="sprite-container">
+        <div data-sprite="performance_anim2"></div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var wcdAnimControl = function(el, filepath, frames, playOption){
+      this.img;
+      this.hidden = 0;
+      this.current = 0;
+      this.sprite = document.querySelector('[data-sprite="' + el + '"]')
+      this.parent = this.sprite.parentNode
+      this.intervalId = 0;
+      this.paused = true;
+      this.button;
+      this.par;
+      
+      var that = this;
 
-<script type="text/javascript">
-var wcdAnimControl = function(el, filepath){
-  this.hidden = 0;
-  this.current = 0;
-  this.parent = document.getElementsByClassName(el)[0].parentNode
-  this.animation = document.getElementsByClassName(el)[0]
-  this.intervalId = 0;
-  this.paused = true;
-  this.button;
-  
-  var that = this;
+      this.loadSprite = function(src, callback) {
+        that.img = new Image();
+        that.img.onload = callback;
+        that.img.src = src;
+      }
 
-  this.init = function(){
-    that.generatePauseButton();
-    that.button.addEventListener('click', function(){ !that.paused ? that.pause() : that.play();});
-    that.event = document.createEvent('HTMLEvents');
-    that.event.initEvent('click', true, false);
+      this.play = function(){
+        that.paused = false;
+        if(that.button)that.button.className = "playbutton active";
+        that.sprite.className += ' ' + 'anim-play';
+      }
 
-    that.loadSprite(filepath, function() {
-      var sprite = document.getElementsByClassName(el)[0];
-      sprite.classList.add('anim-loaded');
-      linen_anim_control.button.dispatchEvent(linen_anim_control.event);
-    });
-  }
+      this.pause = function(){
+        that.paused = true;
+        that.sprite.classList.remove('anim-play');
+        if(that.button)that.button.className = "playbutton";
+      }
 
-  this.loadSprite = function(src, callback) {
-    var sprite = new Image();
-    sprite.onload = callback;
-    sprite.src = src;
-  }
+      this.generatePauseButton = function(){
+        var html = "<a class='playbutton'><span class='sds_visually-hidden'>pause play button</span></a>"
+        var css = ".sprite_anim-control{position: absolute;bottom:0;padding:3%;}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #a0968c;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #a0968c;border-right:4px solid #a0968c;content:'';height:12px;opacity:1;position:absolute;right:0;top:-7px;width:4px;}",
+        style = document.createElement('style');
+        div = document.createElement('div');
+        that.parent.insertBefore(style, that.parent.firstChild);
+        that.parent.appendChild(div);
+        style.type = 'text/css';
+        div.className = 'sprite_anim-control';
 
-  this.play = function(){
-    that.paused = false;
-    that.button.className = "playbutton active";
-    that.animation.className += ' ' + 'play';
-  }
+        style.innerHTML = css;
+        div.innerHTML = html;
+        that.button = that.parent.querySelectorAll('div.sprite_anim-control .playbutton')[0];
+        that.button.addEventListener('click', function(){ !that.paused ? that.pause() : that.play();});
+      }
 
-  this.pause = function(){
-    that.animation.classList.remove('play');
-    that.paused = true;
-    that.button.className = "playbutton";
-  }
+      this.init = function(){
+        that.loadSprite(filepath, function() {
+          
+          var w = that.img.width;
+          var h = that.img.height/frames;
+          that.par = ((h/w)*100).toFixed(3);
+          console.log(that.par);
+          that.parent.style.paddingTop = that.par + "%";
+          that.sprite.classList.add('sprite-loaded');
 
-  this.generatePauseButton = function(){
-    var html = "<a class='playbutton'><span class='sds_visually-hidden'>pause play button</span></a>"
-    var css = ".animcontrol{position: absolute;bottom:0;padding:3%;}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #a0968c;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #a0968c;border-right:4px solid #a0968c;content:'';height:12px;opacity:1;position:absolute;right:0;top:-7px;width:4px;}",
-    style = document.createElement('style');
-    div = document.createElement('div');
-    that.parent.insertBefore(style, that.parent.firstChild);
-    that.parent.appendChild(div);
-    style.type = 'text/css';
-    div.className = 'animcontrol';
+          if(playOption == "autoplay"){
+            that.generatePauseButton();
+            that.event = document.createEvent('HTMLEvents');
+            that.event.initEvent('click', true, false);
 
-    style.innerHTML = css;
-    div.innerHTML = html;
-    that.button = that.parent.querySelectorAll('div.animcontrol .playbutton')[0];
-  }
+            that.button.dispatchEvent(that.event);
+          }
 
-  this.init();
-}
+          if(playOption == "hover"){
+            that.sprite.addEventListener('mouseenter', function(){ 
+              if(that.paused)that.play();
+            });
 
-var linen_anim_control = new wcdAnimControl("sprite", "./assets/ryu-sprite-demo.png");
-</script>
+            that.sprite.addEventListener('mouseleave', function(){ 
+              if(!that.paused)that.pause();
+            });
+          }
+
+          if(typeof(that.sprite.children[0]) != "undefined")that.sprite.children[0].style.display = "none";
+        });
+      }
+
+      this.init();
+    }
+
+    /*var mday_anim_control = new wcdAnimControl("mday-anim1", "/Asset_Archive/BRWeb/content/0015/125/226/assets/mday/300/IMAGE_GIF_COMBINED-lessHeight.jpg", 40);*/
+
+    var performance_anim_control1 = new wcdAnimControl("performance_anim1", "./assets/aloe_film.jpg", 14, "autoplay");
+    var performance_anim_control2 = new wcdAnimControl("performance_anim2", "./assets/paperbag_film.jpg", 7, "hover");
+  </script>
 </body>
