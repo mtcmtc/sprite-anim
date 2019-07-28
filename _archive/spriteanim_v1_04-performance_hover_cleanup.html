@@ -7,39 +7,38 @@
       text-align: center;
     }
 
-    /** Sprite Styles **/
     @keyframes sprite {0% { background-position: 0 0%; } 100%{ background-position: 0 100%; }}
-   
-    [data-sprite]{position: relative;}
-    [data-sprite]::before {content:'';position: absolute;left: 0;right: 0;top: 0;bottom: 0;}
+
+    .sprite-container {position: relative;}
+    [data-sprite] {position: absolute;left: 0;right: 0;top: 0;bottom: 0;}
     [data-sprite].sprite-loaded{animation-name: sprite;animation-iteration-count: infinite;animation-play-state: paused;}
+
     [data-sprite].anim-play{animation-play-state: running;}
 
-    /** Begin Sprite-Specific Styling **/
-    [data-sprite="performance_anim0"].sprite-loaded {background: url('./assets/newarrivals.svg'); animation-duration: .75s; animation-timing-function: steps(13); animation-iteration-count: 1;animation-fill-mode:forwards;padding-top:80%;}
-    /** Insert Sprite Data Here **/
+    [data-sprite="performance_anim1"].sprite-loaded {background:url('./assets/aloe_film.jpg') no-repeat 0 0; background-size: 100%; animation-duration: 2s; animation-timing-function: steps(13);}
+    [data-sprite="performance_anim2"].sprite-loaded {background:url('./assets/paperbag_film.jpg') no-repeat 0 0; background-size: 100%; animation-duration: 1.5s; animation-timing-function: steps(6);}
 
-    [data-sprite].sprite-loaded{background-repeat: no-repeat; background-position: 0 0; background-size:100%;}
+        .sprite-container .sprite_anim-control{right:0;}
   </style>
 </head>
 <body>
-  <div class="mkt_content-wrapper sds_relative">
-    <picture><img alt="sprite poster image" src="./assets/newarrivals_spotlight.jpg" /></picture>
-    <div style="position:absolute;left:0;top:0;width:41.6667%">
-      <div data-sprite="performance_anim0"><picture><img alt="sprite poster image" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIj4KPC9zdmc+Cg==" /></picture></div>
-    </div>
-    <div class="mkt_layer sds_full">
-      <picture><img alt="sprite poster image" src="./assets/newarrivals.svg" /></picture>
+  <div style="max-width:267px; margin:0 auto;margin-bottom:10%;">
+    <div class="sprite-container">
+        <div data-sprite="performance_anim1"></div>
     </div>
   </div>
-  <div style="padding-top:100%;background-color:#999"></div>
+  <div style="max-width:267px; margin:0 auto;">
+    <div class="sprite-container">
+        <div data-sprite="performance_anim2"></div>
+    </div>
+  </div>
   <script type="text/javascript">
     var wcdAnimControl = function(el, filepath, frames, playOption){
       this.img;
       this.hidden = 0;
       this.current = 0;
-      this.sprite = document.querySelector('[data-sprite="' + el + '"]');
-      this.poster = this.sprite.querySelector('img');
+      this.sprite = document.querySelector('[data-sprite="' + el + '"]')
+      this.parent = this.sprite.parentNode
       this.intervalId = 0;
       this.paused = true;
       this.button;
@@ -70,42 +69,34 @@
         var css = ".sprite_anim-control{position: absolute;bottom:0;padding:3%;}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #a0968c;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #a0968c;border-right:4px solid #a0968c;content:'';height:12px;opacity:1;position:absolute;right:0;top:-7px;width:4px;}",
         style = document.createElement('style');
         div = document.createElement('div');
-        
+        that.parent.insertBefore(style, that.parent.firstChild);
+        that.parent.appendChild(div);
         style.type = 'text/css';
         div.className = 'sprite_anim-control';
-        that.sprite.appendChild(style);
-        //div.insertBefore(style, div.firstChild);
-        that.sprite.appendChild(div);
-        
 
         style.innerHTML = css;
         div.innerHTML = html;
-
-        
-
-        that.button = div.lastChild;
+        that.button = that.parent.querySelectorAll('div.sprite_anim-control .playbutton')[0];
         that.button.addEventListener('click', function(){ !that.paused ? that.pause() : that.play();});
       }
 
       this.init = function(){
         that.loadSprite(filepath, function() {
-          //console.log(that.img);
-          //set pixel aspect ratio
-         // document.body.appendChild(that.img);
-          //alert( 'img: ' + that.img.offsetWidth + 'x' + that.img.offsetHeight);
+          
           var w = that.img.width;
           var h = that.img.height/frames;
-         // document.body.removeChild(that.img);
           that.par = ((h/w)*100).toFixed(3);
-          console.log(el + " pixel aspect ratio: " + that.par);
-
-          //if par is > 0 set the padding with js
-          if(that.par > 0)that.sprite.style.paddingTop = that.par + "%";
-
-          //hide poster image once PAR has been established
-          if(that.poster != null) that.poster.style.display = "none";
-          
+          console.log(that.par);
+          that.parent.style.paddingTop = that.par + "%";
           that.sprite.classList.add('sprite-loaded');
+
+          if(playOption == "autoplay"){
+            that.generatePauseButton();
+            that.event = document.createEvent('HTMLEvents');
+            that.event.initEvent('click', true, false);
+
+            that.button.dispatchEvent(that.event);
+          }
 
           if(playOption == "hover"){
             that.sprite.addEventListener('mouseenter', function(){ 
@@ -115,21 +106,18 @@
             that.sprite.addEventListener('mouseleave', function(){ 
               if(!that.paused)that.pause();
             });
-          }else{ 
-            if(playOption == "loop"){
-              that.generatePauseButton();
-              that.event = document.createEvent('HTMLEvents');
-              that.event.initEvent('click', true, false);
-
-              that.button.dispatchEvent(that.event);
-            }else that.play();
           }
+
+          if(typeof(that.sprite.children[0]) != "undefined")that.sprite.children[0].style.display = "none";
         });
       }
 
       this.init();
     }
 
-    var performance_anim_control1 = new wcdAnimControl("performance_anim0", "./assets/newarrivals.svg", 14, "");
+    /*var mday_anim_control = new wcdAnimControl("mday-anim1", "/Asset_Archive/BRWeb/content/0015/125/226/assets/mday/300/IMAGE_GIF_COMBINED-lessHeight.jpg", 40);*/
+
+    var performance_anim_control1 = new wcdAnimControl("performance_anim1", "./assets/aloe_film.jpg", 14, "autoplay");
+    var performance_anim_control2 = new wcdAnimControl("performance_anim2", "./assets/paperbag_film.jpg", 7, "hover");
   </script>
 </body>
