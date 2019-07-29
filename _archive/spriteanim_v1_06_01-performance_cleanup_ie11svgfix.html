@@ -33,22 +33,10 @@
     [data-sprite="performance_anim2"] {
       animation-duration: 1.5s; 
       animation-timing-function: steps(6);}
-
-
-    [data-sprite="performance_anim00"] {
-    animation-duration: 1.5s; 
-    animation-timing-function: steps(13);}
-    [data-sprite="performance_anim01"] {
-    animation-duration: 2s; 
-    animation-timing-function: steps(13);}
-    [data-sprite="performance_anim02"] {
-    animation-duration: 1.5s; 
-    animation-timing-function: steps(6);}
-    [data-sprite="performance_anim02"] .sprite_anim-control{right:0;}
   </style>
 </head>
 <body>
-  <div class="sds_grid-root sds_sp_xl">
+  <div class="sds_grid-root">
     <div class="sds_g-1-6"></div>
     <div class="sds_g-1-6">
       <div data-sprite="performance_anim0" data-sprite-src="./assets/newarrivals.svg" data-sprite-framecount="14">
@@ -67,87 +55,42 @@
     </div>
     <div class="sds_g-1-6"></div>
   </div>
-
-  <div class="sds_grid-root">
-    <div class="sds_g-1-6"></div>
-    <div class="sds_g-1-6">
-      <div data-sprite="performance_anim00" data-sprite-src="./assets/linen.jpg" data-sprite-framecount="14" data-sprite-playback="loop"></div>
-    </div>
-    <div class="sds_g-1-12"></div>
-    <div class="sds_g-1-6">
-      <div data-sprite="performance_anim01" data-sprite-src="./assets/aloe_film.jpg" data-sprite-framecount="14"></div>
-    </div>
-    <div class="sds_g-1-12"></div>
-    <div class="sds_g-1-6">
-      <div data-sprite="performance_anim02" data-sprite-src="./assets/paperbag_film.jpg" data-sprite-framecount="7"></div>
-    </div>
-    <div class="sds_g-1-6"></div>
-  </div>
-</div>
   <script type="text/javascript">
-    var wcdAnimControl = function(sel){
-      this.sprites = [];
+    var wcdAnimControl = function(el){
+      this.img;
+      this.hidden = 0;
+      this.current = 0;
+      this.sprite = document.querySelector('[data-sprite="' + el + '"]');
+      this.filepath = this.sprite.getAttribute('data-sprite-src');
+      this.frames = this.sprite.getAttribute('data-sprite-framecount');
+      this.playback = this.sprite.getAttribute('data-sprite-playback');
+      this.poster = this.sprite.querySelector('img');
+      this.intervalId = 0;
       this.paused = true;
-
+      this.button;
+      this.par;
+      
       var that = this;
 
-      this.spriteData = function(item) {
-        thisSprite = document.querySelector('[data-sprite="' + item + '"]');
-        that.sprites.push( {
-          sprite :  thisSprite,
-          filepath : thisSprite.getAttribute('data-sprite-src'),
-          frames : thisSprite.getAttribute('data-sprite-framecount'),
-          playback : thisSprite.getAttribute('data-sprite-playback'),
-          poster : thisSprite.querySelector('img')
-        } );
-      }
-
-      this.loadSprite = function(data, callback) {
-        data.img = new Image();
-        data.img.onload = callback;
-        data.img.src = data.filepath;
-      }
-
-      this.calcPAR = function(data){
-        var w = data.img.width;
-        var h = data.img.height/data.frames;
-
-        if(data.filepath.indexOf('.svg') > -1){
-          /* fix for SVGs in IE11. Use ajax to get SVG as XML */
-          jQuery.get(data.filepath, function(svgxml){
-              /* now with access to the source of the SVG, lookup the values you want... */
-              var attrs = svgxml.documentElement.attributes;
-              //alert( 'img: ' + attrs.width.value + 'x' + attrs.height.value );
-
-              /* do something with the svg, like add it to the document for example... */
-              w = attrs.width.value;
-              h = attrs.height.value/data.frames;
-              data.par = ((h/w)*100).toFixed(2);
-              if(data.par > 0)data.sprite.style.paddingTop = data.par + "%";
-          }, "xml");
-        }else{
-          data.par = ((h/w)*100).toFixed(2);
-          if(data.par > 0)data.sprite.style.paddingTop = data.par + "%";
-        }
+      this.loadSprite = function(src, callback) {
+        that.img = new Image();
+        that.img.onload = callback;
+        that.img.src = src;
       }
 
       this.play = function(){
         that.paused = false;
         if(that.button)that.button.className = "playbutton active";
-        that.sprites.forEach(function(item, i){
-          item.sprite.className += ' ' + 'anim-play';
-        })
+        that.sprite.className += ' ' + 'anim-play';
       }
 
       this.pause = function(){
         that.paused = true;
-        that.sprites.forEach(function(item, i){
-          item.sprite.classList.remove('anim-play');
-        });
+        that.sprite.classList.remove('anim-play');
         if(that.button)that.button.className = "playbutton";
       }
 
-      this.generatePauseButton = function(data){
+      this.generatePauseButton = function(){
         var html = "<a class='playbutton'><span class='sds_visually-hidden'>pause play button</span></a>"
         var css = ".sprite_anim-control{position: absolute;bottom:0;padding:3%;}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #a0968c;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #a0968c;border-right:4px solid #a0968c;content:'';height:12px;opacity:1;position:absolute;right:0;top:-7px;width:4px;}",
         style = document.createElement('style');
@@ -155,8 +98,8 @@
         
         style.type = 'text/css';
         div.className = 'sprite_anim-control';
-        data.sprite.appendChild(style);
-        data.sprite.appendChild(div);
+        that.sprite.appendChild(style);
+        that.sprite.appendChild(div);
         
 
         style.innerHTML = css;
@@ -167,47 +110,61 @@
         that.button.addEventListener('click', function(){ !that.paused ? that.pause() : that.play();});
       }
 
-      this.constructSprites = function(item, i){
-        that.spriteData(item);
+      this.calcPAR = function(img){
+        var w = that.img.width;
+        var h = that.img.height/that.frames;
 
-        that.loadSprite(that.sprites[i], function(e){
-          
-          $data = that.sprites[i];
+        if(that.filepath.indexOf('.svg') > -1){
+          /* fix for SVGs in IE11. Use ajax to get SVG as XML */
+          jQuery.get(that.filepath, function(svgxml){
+              /* now with access to the source of the SVG, lookup the values you want... */
+              var attrs = svgxml.documentElement.attributes;
+              //alert( 'img: ' + attrs.width.value + 'x' + attrs.height.value );
 
-          $data.sprite.style.backgroundImage = "url('" + $data.img.src + "')";
-
-          that.calcPAR($data);
-
-          //hide poster image once PAR has been established
-          if($data.poster != null) $data.poster.style.display = "none";
-
-          if($data.playback == "hover"){
-            $data.sprite.addEventListener('mouseenter', function(){ 
-              if(that.paused)that.play();
-            });
-
-            $data.sprite.addEventListener('mouseleave', function(){ 
-              if(!that.paused)that.pause();
-            });
-          }else if((i == (sel.length - 1) && sel.length > 1) || (sel.length == 1 && $data.playback == "loop")){
-            that.generatePauseButton($data);
-            that.event = document.createEvent('HTMLEvents');
-            that.event.initEvent('click', true, false);
-
-            that.button.dispatchEvent(that.event);
-          }else that.play();
-        });
+              /* do something with the svg, like add it to the document for example... */
+              w = attrs.width.value;
+              h = attrs.height.value/that.frames;
+              that.par = ((h/w)*100).toFixed(3);
+              if(that.par > 0)that.sprite.style.paddingTop = that.par + "%";
+          }, "xml");
+        }else{
+          that.par = ((h/w)*100).toFixed(3);
+          if(that.par > 0)that.sprite.style.paddingTop = that.par + "%";
+        }
       }
 
       this.init = function(){
-        if(!(sel instanceof Array)){
-          sel = sel.split();
-        }
+        that.loadSprite(that.filepath, function() {
+          console.log('sprite img loaded')
 
-        sel.forEach(function(item, i){
-            
-          that.constructSprites(item, i);
+          //set background image after image has loaded
+          that.sprite.style.backgroundImage = "url('" + that.img.src + "')";
+
+          //set pixel aspect ratio
+          that.calcPAR(that.img);
           
+          console.log(el + " pixel aspect ratio: " + that.par);
+
+          //hide poster image once PAR has been established
+          if(that.poster != null) that.poster.style.display = "none";
+
+          if(that.playback == "hover"){
+            that.sprite.addEventListener('mouseenter', function(){ 
+              if(that.paused)that.play();
+            });
+
+            that.sprite.addEventListener('mouseleave', function(){ 
+              if(!that.paused)that.pause();
+            });
+          }else{ 
+            if(that.playback == "loop"){
+              that.generatePauseButton();
+              that.event = document.createEvent('HTMLEvents');
+              that.event.initEvent('click', true, false);
+
+              that.button.dispatchEvent(that.event);
+            }else that.play();
+          }
         });
       }
 
@@ -217,6 +174,5 @@
     var performance_anim_control0 = new wcdAnimControl("performance_anim0");
     var performance_anim_control1 = new wcdAnimControl("performance_anim1");
     var performance_anim_control2 = new wcdAnimControl("performance_anim2");
-    var performance_anim_control3 = new wcdAnimControl(["performance_anim00","performance_anim01","performance_anim02"]);
   </script>
 </body>
