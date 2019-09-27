@@ -37,9 +37,3 @@ Instantiate sprite control object
     var sprite_anim_control3 = new wcdAnimControl("sprite_anim02");
   </script>
 ```
-
-### CSS
-
-### HTML
-
-### JS
