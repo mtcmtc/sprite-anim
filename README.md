@@ -6,145 +6,29 @@ Sprite Animations allow you to to implement controllable animations - an accessi
 
 Download the most recent JS and CSS files.
 
+Setting up the HTML
 ```html
-<style type="text/css">
-    
-    @keyframes sprite {0% { transform: translateY(0); } 100%{ transform: translateY(-100%); }}
-    @-webkit-keyframes sprite {0% { -webkit-transform: translateY(0); } 100%{ -webkit-transform: translateY(-100%);}}
-   
-    [data-sprite]{position: relative; overflow: hidden;}
-    [data-sprite] img{position:absolute;top:0;left:0;width:100%;}
-    [data-sprite].anim-loaded img{
-      -webkit-animation-name: sprite; animation-name: sprite;
-      -webkit-animation-iteration-count: infinite; animation-iteration-count: infinite;
-      -webkit-animation-play-state: paused; animation-play-state: paused;}
-    [data-sprite].anim-loaded.anim-play img{-webkit-animation-play-state: running;animation-play-state: running;}
-  </style>
+      <!-- Sprite 1 HTML - options: 8 frames, .8 seconds, autoplay-->
+
+      <div data-sprite="sprite_anim00" data-sprite-src="./assets/test-anim_full.jpg" data-sprite-duration=".8" data-sprite-framecount="8" data-sprite-playback="auto"></div>
+
+
+      <!-- Sprite 2 HTML - options: 30 frames, 2 seconds, autoplay-->
+
+      <div data-sprite="sprite_anim01" data-sprite-src="./assets/performance-sprites/poloanimation.jpg" data-sprite-duration="2" data-sprite-framecount="30" data-sprite-playback="auto"></div>
+
+
+      <!-- Sprite 3 HTML - options: 14 frames, 1.5 seconds, hover to play-->
+
+      <div data-sprite="sprite_anim02" data-sprite-src="./assets/linen.jpg" data-sprite-duration="1.5" data-sprite-framecount="14" data-sprite-playback="hover"></div>
 ```
 
+Instantiate sprite control object
 ```html
-<script type="text/javascript">
-    var spriteAnimControl = function(sel){
-      this.sprite;
-      this.paused = true;
-
-      var that = this;
-
-      this.spriteData = function(sel) {
-        thisSprite = document.querySelector('[data-sprite="' + sel + '"]');
-        that.sprite = {
-          el :  thisSprite,
-          filepath : thisSprite.getAttribute('data-sprite-src'),
-          frames : thisSprite.getAttribute('data-sprite-framecount'),
-          playback : thisSprite.getAttribute('data-sprite-playback'),
-          duration : thisSprite.getAttribute('data-sprite-duration'),
-          poster : thisSprite.querySelector('img')
-        };
-
-        thisSprite.removeAttribute('data-sprite-src');
-        thisSprite.removeAttribute('data-sprite-framecount');
-        thisSprite.removeAttribute('data-sprite-playback');
-        thisSprite.removeAttribute('data-sprite-duration');
-      }
-
-      this.loadSprite = function(data, callback) {
-        data.img = new Image();
-        data.img.onload = callback;
-        data.img.src = data.filepath;
-      }
-
-      this.calcPAR = function(sprite){
-        var w = sprite.img.width;
-        var h = sprite.img.height/sprite.frames;
-        if(sprite.filepath.indexOf('.svg') > -1){
-          /* fix for SVGs in IE11. Use ajax to get SVG as XML */
-          jQuery.get(sprite.filepath, function(svgxml){
-              /* now with access to the source of the SVG, lookup the values you want... */
-              var attrs = svgxml.documentElement.attributes;
-              //alert( 'img: ' + attrs.width.value + 'x' + attrs.height.value );
-              /* do something with the svg, like add it to the document for example... */
-              w = attrs.width.value;
-              h = attrs.height.value/sprite.frames;
-              sprite.par = ((h/w)*100).toFixed(2);
-              sprite.el.style.paddingTop = sprite.par + "%";
-          }, "xml");
-        }else{
-          sprite.par = ((h/w)*100).toFixed(2);
-          sprite.el.style.paddingTop = sprite.par + "%";
-        }
-      }
-
-      this.play = function(){
-        that.paused = false;
-        if(that.button)that.button.className = "playbutton active";
-        that.sprite.el.className += ' ' + 'anim-play';
-      }
-
-      this.pause = function(){
-        that.paused = true;
-        that.sprite.el.classList.remove('anim-play');
-        if(that.button)that.button.className = "playbutton";
-      }
-
-      this.generatePauseButton = function(){
-        var html = "<a class='playbutton'><span class='sds_visually-hidden'>pause play button</span></a>"
-        var css = ".sprite_anim-control{position: absolute;bottom:0;padding:1.5%;right:0}.playbutton{cursor:pointer;border-bottom:8px solid transparent;border-left:12px solid #a0968c;border-top:8px solid transparent;display:inline-block;height:0;position:relative;width:0;z-index:1;transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:before{border-radius:0;10 content:'';position:absolute;z-index:2 transition:all 0.2s;-webkit-transition:all 0.2s;-moz-transition:all 0.2s}.playbutton:after{content:'';opacity:0;transition:opacity 0.6s;-webkit-transition:opacity 0.6s;-moz-transition:opacity 0.6s}.playbutton.active{border-color:transparent}.playbutton.active:after{border-left:4px solid #a0968c;border-right:4px solid #a0968c;content:'';height:12px;opacity:1;position:absolute;right:0;top:-7px;width:4px;}",
-        style = document.createElement('style');
-        div = document.createElement('div');
-        
-        style.type = 'text/css';
-        div.className = 'sprite_anim-control';
-        that.sprite.el.appendChild(style);
-        that.sprite.el.appendChild(div);
-        
-
-        style.innerHTML = css;
-        div.innerHTML = html;
-        
-
-        that.button = div.lastChild;
-        that.button.addEventListener('click', function(){ !that.paused ? that.pause() : that.play();});
-      }
-
-      this.constructSprite = function(item){
-        that.spriteData(item);
-
-        that.loadSprite(that.sprite, function(e){
-
-          $sprite = that.sprite;
-
-          $sprite.el.classList.add('anim-loaded');
-          
-          that.calcPAR($sprite);
-
-          var animStyles = "-webkit-animation-timing-function:steps(" + $sprite.frames + ");-webkit-animation-duration:" + $sprite.duration + "s;" + "animation-timing-function:steps(" + $sprite.frames + ");animation-duration:" + $sprite.duration + "s;";
-          $sprite.el.appendChild($sprite.img);
-          $sprite.el.firstChild.setAttribute("style", animStyles);
-
-          //hide poster image once PAR has been established
-          if($sprite.poster != null) $sprite.poster.style.display = "none";
-
-          if($sprite.playback == "hover"){
-            $sprite.el.addEventListener('mouseenter', function(){ 
-              if(that.paused)that.play();
-            });
-
-            $sprite.el.addEventListener('mouseleave', function(){ 
-              if(!that.paused)that.pause();
-            });
-          }else {
-            that.generatePauseButton();
-            if($sprite.playback == "auto"){that.play();}
-          }
-        });
-      }
-
-      this.init = function(){
-        that.constructSprite(sel);
-      }
-
-      this.init();
-    }
+  <script type="text/javascript">
+    var sprite_anim_control1 = new wcdAnimControl("sprite_anim00");
+    var sprite_anim_control2 = new wcdAnimControl("sprite_anim01");
+    var sprite_anim_control3 = new wcdAnimControl("sprite_anim02");
   </script>
 ```
 
