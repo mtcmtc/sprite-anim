@@ -6,6 +6,12 @@ Sprite Animations allow you to to implement controllable animations - an accessi
 
 Download the most recent JS and CSS files.
 
+Load JS and CSS files
+```html
+  <script src="./public/spriteanim.js"></script>
+  <link rel="stylesheet" type="text/css" href="./public/spriteanim.css">
+```
+
 Setting up the HTML
 ```html
       <!-- Sprite 1 HTML - options: 8 frames, .8 seconds, autoplay-->
