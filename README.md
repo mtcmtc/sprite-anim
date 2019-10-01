@@ -1,6 +1,6 @@
 # Sprite Animation
 
->>[See Demo](https://mikechen.dev/sprite-anim/)
+>**[See Demo](https://mikechen.dev/sprite-anim/)**
 
 Sprite Animations allow you to to implement controllable animations - an accessible alternative to GIF animations. This method of animation requires assets to be sliced like a [film strip](https://github.com/mtcmtc/sprite-anim/blob/master/assets/ryu-sprite-demo.png?raw=true), allowing CSS3 transforms to translate-y the sprite image like a frame-by-frame animation. __Note: each frame in the image file should be the same height (i.e. a sprite with a height of 300px that has 10 frames should be sliced as a jpeg with 3000px height.__
 
@@ -8,8 +8,11 @@ Sprite Animations allow you to to implement controllable animations - an accessi
 
 Download the most recent JS and CSS files or include them in your HTML file.
 
->>[spriteanim.js](https://raw.githubusercontent.com/mtcmtc/sprite-anim/master/public/spriteanim.js)
->>[spriteanim.css](https://raw.githubusercontent.com/mtcmtc/sprite-anim/master/public/spriteanim.css)
+JS File
+>[spriteanim.js](https://raw.githubusercontent.com/mtcmtc/sprite-anim/master/public/spriteanim.js)
+
+CSS File
+>[spriteanim.css](https://raw.githubusercontent.com/mtcmtc/sprite-anim/master/public/spriteanim.css)
 
 
 
