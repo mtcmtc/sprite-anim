@@ -12,7 +12,20 @@ Load JS and CSS files
   <link rel="stylesheet" type="text/css" href="./public/spriteanim.css">
 ```
 
+######Data Attributes
+
+**data-sprite
+
+**data-sprite-src
+
+**data-sprite-duration
+
+**data-sprite-framecount
+
+**data-sprite-playback (optional)
+
 Setting up the HTML
+
 ```html
       <!-- Sprite 1 HTML - options: 8 frames, .8 seconds, autoplay-->
 
