@@ -14,7 +14,7 @@ Load JS and CSS files. Make sure to update the file path.
 
 ### Data Attributes
 
-To set up your sprite animation, create a <div> and include the following data attributes:
+To set up your sprite animation, create a div element and include the following data attributes:
 
 **data-sprite** – This is essentially an ID attribute used when you instantiate a spriteControl object.
 
