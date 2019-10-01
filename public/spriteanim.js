@@ -1,6 +1,6 @@
 /** Begin Sprite JS **/
 
-var wcdAnimControl = function(sel){
+var spriteControl = function(sel){
   this.sprite;
   this.paused = true;
 
